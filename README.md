@@ -102,7 +102,8 @@ Optional: Tailscale (to find your Macs), Remote Login on the Macs you want to se
 
 Claude Code hands its statusline your plan's usage (5-hour and weekly windows). `install.sh` copies a small statusline to
 `~/.claude/fleetnotch-statusline.py` that saves only those percentages and reset times (no credential, no prompt) to
-`~/.claude/deck-rate-limits.json`, where FleetNotch reads them. Turn it on in `~/.claude/settings.json`:
+`~/.claude/deck-rate-limits.json`, where FleetNotch reads them. Turn it on in `~/.claude/settings.json` (until you do, `install.sh`
+prints the exact line to add, already chained with your current statusline if you have one):
 
 ```json
 "statusLine": {"type": "command", "command": "~/.claude/fleetnotch-statusline.py"}
@@ -121,7 +122,8 @@ rm -rf ~/Applications/FleetNotch.app ~/Library/LaunchAgents/app.fleetnotch.plist
 while security delete-generic-password -s FleetNotch >/dev/null 2>&1; do :; done   # keys saved in the Keychain
 ```
 
-If you turned on the Claude ring, also remove the `statusLine` line from `~/.claude/settings.json`. Nothing was installed on
+If you turned on the Claude ring, also take `~/.claude/fleetnotch-statusline.py` out of the `statusLine` command in
+`~/.claude/settings.json` (remove the line, or leave just your own statusline if you chained one). Nothing was installed on
 the Macs and servers you watched (only cleanup actions leave a log in `~/Library/Logs/fleetnotch` there).
 
 ## Privacy & security

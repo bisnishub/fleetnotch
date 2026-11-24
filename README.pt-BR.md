@@ -102,7 +102,8 @@ Codex (pergunta rápida).
 
 O Claude Code entrega ao statusline o uso do seu plano (janela de 5 horas e semanal). O `install.sh` copia um statusline pequeno
 pra `~/.claude/fleetnotch-statusline.py` que guarda só esses percentuais e horários de reset (nenhuma credencial, nenhum prompt) em
-`~/.claude/deck-rate-limits.json`, de onde o FleetNotch lê. Ligue no `~/.claude/settings.json`:
+`~/.claude/deck-rate-limits.json`, de onde o FleetNotch lê. Ligue no `~/.claude/settings.json` (enquanto não ligar, o `install.sh`
+mostra a linha exata, já encadeada com o seu statusline atual se você tiver um):
 
 ```json
 "statusLine": {"type": "command", "command": "~/.claude/fleetnotch-statusline.py"}
@@ -121,7 +122,8 @@ rm -rf ~/Applications/FleetNotch.app ~/Library/LaunchAgents/app.fleetnotch.plist
 while security delete-generic-password -s FleetNotch >/dev/null 2>&1; do :; done   # chaves guardadas no Keychain
 ```
 
-Se ligou o anel do Claude, tire também a linha `statusLine` do `~/.claude/settings.json`. Nada foi instalado nos Macs e servidores
+Se ligou o anel do Claude, tire também o `~/.claude/fleetnotch-statusline.py` do comando `statusLine` no
+`~/.claude/settings.json` (apague a linha, ou deixe só o seu statusline se você encadeou um). Nada foi instalado nos Macs e servidores
 que você acompanhava (só as ações de limpeza deixam um log em `~/Library/Logs/fleetnotch` neles).
 
 ## Privacidade e segurança
