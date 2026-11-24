@@ -49,4 +49,18 @@ edit it by hand. **No secrets here**: keys and passwords live in the Keychain (s
 | `modulos.orca` | missing = on only if `/Applications/Orca.app` exists |
 | `ordem` | drawer blocks top to bottom; neighbouring `email`, `orca`, `sincronizacao` share one row |
 
+### How `host` is reached
+
+Every cycle the collector reads `tailscale status` and resolves each `host`:
+
+| `host` is… | Online status from | SSH goes to |
+|---|---|---|
+| `local` (or empty) | — | nothing: this Mac is read directly |
+| a Tailscale name or `100.x` IP that is **also a `Host` alias in `~/.ssh/config`** | Tailscale | the **alias**, so its `HostName`, `User`, `IdentityFile` and `known_hosts` entry apply |
+| a Tailscale name or `100.x` IP with no alias | Tailscale | the node's Tailscale IP |
+| anything else (IP, DNS name, alias of a host outside the tailnet) | the probe itself | `host` as typed |
+
+Only plain aliases on `Host` lines count (no wildcards); `Include` and `Match` are not followed. A user set in the app's
+**SSH username** field still wins over the alias's `User`.
+
 Keychain accounts (service `FleetNotch`): `composio`, `imap:<user>@<server>`, `uazapi:<host>`, `anthropic`, `openai`.

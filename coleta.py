@@ -51,13 +51,40 @@ def resolver(host, rede):
     curto = h.split('.')[0].lower()
     for nome, n in rede.items():
         if n['ip'] == h or (not h[:1].isdigit() and nome.lower() == curto):
-            return n
+            # apelido do ~/.ssh/config com o mesmo nome da Tailscale: o online vem da Tailscale, mas o SSH vai pelo
+            # apelido, que traz o HostName, o User, a IdentityFile e o known_hosts de lá (pelo IP nada disso vale)
+            return dict(n, ssh=h) if h.lower() in apelidos_ssh() else n
     return {'ip': h, 'online': None, 'self': False}
+
+
+SSH_CONFIG = os.path.expanduser('~/.ssh/config')
+_APELIDOS = {'mtime': None, 'nomes': frozenset()}
+
+
+def apelidos_ssh():
+    """Os apelidos sem curinga das linhas Host do ~/.ssh/config (em minúsculas, como o ssh compara), relidos só
+    quando o arquivo muda. Não segue Include nem Match: o que estiver só lá continua indo pelo IP da Tailscale."""
+    try:
+        mt = os.path.getmtime(SSH_CONFIG)
+    except OSError:
+        return frozenset()
+    if _APELIDOS['mtime'] != mt:
+        nomes = set()
+        try:
+            for linha in open(SSH_CONFIG, errors='replace'):
+                m = re.match(r'\s*host\s+(.+)', linha, re.I)  # "Host x y", não "HostName"
+                if m:
+                    nomes.update(a.lower() for a in m.group(1).split() if not any(c in a for c in '*?!'))
+        except OSError:
+            return frozenset()
+        _APELIDOS.update(mtime=mt, nomes=frozenset(nomes))
+    return _APELIDOS['nomes']
 
 
 def destino(m):
     u = m.get('usuario') or CFG.get('usuarioSSH')
-    return f"{u}@{m['ip']}" if u else m['ip']
+    alvo = m.get('ssh') or m['ip']
+    return f"{u}@{alvo}" if u else alvo
 
 
 def erro_ssh(err):

@@ -197,6 +197,20 @@ assert coleta.resolver('192.0.2.2', rede)['ip'] == '192.0.2.2' and coleta.resolv
 assert coleta.resolver('vps.example.com', rede) == {'ip': 'vps.example.com', 'online': None, 'self': False}
 assert coleta.destino({'ip': 'vps', 'usuario': 'root'}) == 'root@vps' and coleta.destino({'ip': 'vps', 'usuario': ''}) in ('vps', f"{coleta.CFG.get('usuarioSSH')}@vps")
 print('ok resolver')
+# apelido do ~/.ssh/config com o mesmo nome da Tailscale: online da Tailscale, SSH pelo apelido (chave/usuário/known_hosts)
+cfg_ssh = os.path.join(tempfile.mkdtemp(), 'config')
+open(cfg_ssh, 'w').write('Host studio mini\n    HostName mini.tail1234.ts.net\n    User eu\nHost *.ts.net\n    IdentitiesOnly yes\n')
+SSH_CONFIG_ORIG, coleta.SSH_CONFIG = coleta.SSH_CONFIG, cfg_ssh
+assert coleta.apelidos_ssh() == {'studio', 'mini'}  # curinga e HostName ficam de fora
+r = coleta.resolver('mini', rede)
+assert r['ip'] == '192.0.2.2' and r['online'] is False and r['ssh'] == 'mini' and coleta.destino(dict(r, usuario='')) in ('mini', f"{coleta.CFG.get('usuarioSSH')}@mini")
+assert 'ssh' not in coleta.resolver('192.0.2.2', rede)  # IP digitado continua indo pelo IP
+open(cfg_ssh, 'w').write('Host outro\n'); os.utime(cfg_ssh, (1, 1))  # mudou o arquivo: relê
+assert coleta.apelidos_ssh() == {'outro'} and 'ssh' not in coleta.resolver('mini', rede)
+coleta.SSH_CONFIG = '/nao/existe'
+assert coleta.apelidos_ssh() == frozenset() and coleta.resolver('mini', rede) == rede['mini']
+coleta.SSH_CONFIG = SSH_CONFIG_ORIG
+print('ok apelido ssh')
 
 # servidor Linux: disco, serviço parado e container doente viram alerta; container parado de propósito não
 L = {'so': 'Ubuntu 24.04', 'kernel': '6.8', 'host': 'web', 'nucleos': 4, 'uptime': 90000, 'carga': [0.5, 0.4, 0.3], 'cpu': 12,
