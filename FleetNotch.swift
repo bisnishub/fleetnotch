@@ -513,7 +513,7 @@ struct Aneis: View {
             }
         }
         // dica do sistema ao parar o mouse: diz qual anel é qual sem depender da legenda do rodapé
-        .help((0..<3).map { "\(Paleta.nomes[$0]) \(v[$0])%" }.joined(separator: " · "))
+        .help((0..<3).map { "\(nomeMetrica(k[$0])) \(md.texto(k[$0]))" }.joined(separator: " · "))
     }
 }
 
