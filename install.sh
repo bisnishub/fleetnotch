@@ -21,9 +21,9 @@ PL="$HOME/Library/LaunchAgents/$ROT.plist"
 launchctl bootout "gui/$(id -u)/$ROT" 2>/dev/null || true
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-swiftc -O -swift-version 5 -parse-as-library FleetNotch.swift Ajustes.swift Assistente.swift -o "$APP/Contents/MacOS/FleetNotch"
+swiftc -O -swift-version 5 -parse-as-library FleetNotch.swift Ajustes.swift Assistente.swift Visual.swift -o "$APP/Contents/MacOS/FleetNotch"
 # a config do usuário mora fora do app: ~/Library/Application Support/FleetNotch/config.json (sem segredo; segredo no Keychain)
-cp coleta.py comum.py agentes.py caixas.py ajustes.py pergunta.py demo.py acoes.py sonda.py sonda_linux.sh "$APP/Contents/Resources/"
+cp coleta.py comum.py agentes.py caixas.py ajustes.py pergunta.py demo.py acoes.py modelos.py sonda.py sonda_linux.sh "$APP/Contents/Resources/"
 # idiomas: as tabelas (o app e o Python leem as mesmas) e um .lproj por idioma, que faz o macOS listar o app em
 # Ajustes do Sistema › Geral › Idioma e Região › Aplicativos; o pedido de Localização sai traduzido de cada tabela
 cp -R i18n "$APP/Contents/Resources/"

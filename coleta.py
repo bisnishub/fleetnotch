@@ -136,6 +136,20 @@ def alerta(d):
     return None
 
 
+def extras(d):
+    """Pros anéis que o usuário escolhe nos Ajustes: disco do sistema (% usado) e temperatura (°C)."""
+    i = next((x for x in d['discos'] if x['nome'] == 'Interno'), (d['discos'] or [None])[0])
+    r = {'disco': 100 - pct(i['livre'], i['total'])} if i else {}
+    if d['temp'] is not None:
+        r['temp'] = round(d['temp'])
+    return r
+
+
+def niveis_extras(d):
+    x = extras(d)
+    return dict({'disco': nivel_disco(100 - x['disco'])} if 'disco' in x else {}, **({'temp': nivel_de('temp', x['temp'])} if 'temp' in x else {}))
+
+
 def detalhe(d, ip, plug):
     """Página de detalhe do Mac na ilha (estruturado; o menu da barra continua usando linhas())."""
     r = d['rede']
@@ -636,8 +650,9 @@ def ciclo(n, cache_plug, pedido=False):
                           linhas=[f'⚠️ {a}' for a in alertas] + linhas(d, m['ip'], plug), nivel=nv,
                           modelo=m.get('icone') or d['modelo'], card=card(d, plug),
                           # campos estruturados pra ilha desenhar medidores em vez de texto
-                          medidas={'cpu': d['cpu'] or 0, 'gpu': d['gpu'] or 0, 'ram': pct(d['ram']['usado'], d['ram']['total']), 'carga': carga},
-                          niveis={k: nivel_de(k, v) for k, v in (('cpu', d['cpu']), ('gpu', d['gpu']), ('ram', pct(d['ram']['usado'], d['ram']['total'])))},
+                          medidas=dict({'cpu': d['cpu'] or 0, 'gpu': d['gpu'] or 0, 'ram': pct(d['ram']['usado'], d['ram']['total']), 'carga': carga}, **extras(d)),
+                          niveis=dict({k: nivel_de(k, v) for k, v in (('cpu', d['cpu']), ('gpu', d['gpu']), ('ram', pct(d['ram']['usado'], d['ram']['total'])))},
+                                      **niveis_extras(d)),
                           alerta=alerta(d), detalhe=detalhe(d, m['ip'], plug)))
     servidores = [servidor(s, d, e) for s, (d, e) in zip(srvs, rs)]
     return {'barra': f"{PONTO[pior[0]]} {pior[2]}{' ⚠️' if avisos else ''}" if pior else ('⚪️ ' + t('frota offline') if maqs else '⚪️'),
